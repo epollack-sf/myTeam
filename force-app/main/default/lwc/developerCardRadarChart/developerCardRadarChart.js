@@ -1,27 +1,27 @@
 import { LightningElement, api } from 'lwc';
 import { loadScript } from 'lightning/platformResourceLoader';
-import CHARTJS from '@salesforce/resourceUrl/ChartJS';
+import ChartJS from '@salesforce/resourceUrl/ChartJS';
 
 const MAX_LEVEL = 5;
+
 export default class DeveloperCardRadarChart extends LightningElement {
-    @api skills; // expected to be an array of Skill objects 
-                // {id: '', Type__c: '', Category__c: '', Name: '', Rating__c: 2}
-    
+    @api skills; // expected to be an array of Skill objects: {id: '', Type__c: '', Category__c: '', Name: '', Rating__c: 2}
+
     get data() {
         const formattedData = [];
         
-        const top8Categories = this.getTop8Categories(this.skills); // array of categories <string>
+        const top8Categories = this.getTop8Categories(this.skills);
         const skillsInTop8 = this.skills.filter(skill => top8Categories.includes(skill.Category__c));
         
-        for (category of top8Categories) {
+        for (let category of top8Categories) {
             formattedData.push({ category: category, ratio: this.getRatingPercentage(skillsInTop8, category) });
         }
-
+        
         return formattedData;
     }
 
     renderedCallback() {
-        loadScript(this, `${CHARTJS}/chart.js`)
+        loadScript(this, `${ChartJS}/chart.js`)
             .then(() => this.initializeChart())
             .catch(e => console.error('Failed to load chart.js', e.message));
     }
@@ -50,7 +50,7 @@ export default class DeveloperCardRadarChart extends LightningElement {
         } else {
             let counts = [];
             
-            for (category of uniqueCategories) {
+            for (let category of uniqueCategories) {
                 counts.push({ category: category, count: totalCategories.filter(c => c === category).length });
             }
             counts.sort((a, b) => b.count - a.count);
@@ -66,18 +66,4 @@ export default class DeveloperCardRadarChart extends LightningElement {
 
         return sumRatings / (MAX_LEVEL * numEntries);
     }
-
-    /*get ratingPercentage() {
-        let skillsInTop8 = this.skills.filter(skill => this.top8Categories.includes(skill.Category__c));
-        let useableData = [];
-        for (category of this.top8Categories) {
-            let entriesByCategory = skillsInTop8.filter(skill => skill.Category__c === category);
-            let numEntries = entriesByCategory.length;
-            let sumRatings = entriesByCategory.map(skill => skill.Rating__c).reduce((acc, currVal) => acc + currVal, 0);
-
-            useableData.push({ category: category, ratio: sumRatings / (MAX_LEVEL * numEntries) })
-        }
-
-        return useableData;
-    }*/
 }

@@ -4,11 +4,45 @@ import CHARTJS from '@salesforce/resourceUrl/ChartJS';
 
 const MAX_LEVEL = 5;
 export default class DeveloperCardRadarChart extends LightningElement {
-    @api skills; // expected to be am array of objects 
-    // {id: '', Type__c: '', Category__c: '', Name: '', Rating__c: 2}
+    @api skills; // expected to be an array of Skill objects 
+                // {id: '', Type__c: '', Category__c: '', Name: '', Rating__c: 2}
+    
+    get data() {
+        let formattedData = [];
+        
+        let top8Categories = this.getTop8Categories(this.skills); // array of categories <string>
+        let skillsInTop8 = this.skills.filter(skill => top8Categories.includes(skill.Category__c));
+        
+        for (category of top8Categories) {
+            formattedData.push({ category: category, ratio: this.getRatingPercentage(skillsInTop8, category) });
+        }
 
-    get top8Categories() {
-        let totalCategories = this.skills.map(skill => skill.Category__c);
+        return formattedData;
+    }
+
+    renderedCallback() {
+        loadScript(this, `${CHARTJS}/chart.js`)
+            .then(() => this.initializeChart())
+            .catch(e => console.error('Failed to load chart.js', e.message));
+    }
+
+    initializeChart() {
+        const ctx = this.template.querySelector('canvas');
+
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: [...this.data.map(entry => entry.category)],
+                datasets: [{
+                    label: '% of ',
+                    data: [...this.data.map(entry => entry.ratio)],
+                }]
+            }
+        });
+    }
+
+    getTop8Categories(skills) {
+        let totalCategories = skills.map(skill => skill.Category__c);
         let uniqueCategories = Array.from(new Set(totalCategories));
         
         if (uniqueCategories.length <= 8) {
@@ -25,24 +59,25 @@ export default class DeveloperCardRadarChart extends LightningElement {
         }
     }
 
-    renderedCallback() {
-        loadScript(this, `${CHARTJS}/chart.js`)
-            .then(() => this.initializeChart())
-            .catch((e) => console.error('Failed to load chart.js', e.message));
+    getRatingPercentage(skills, category) {
+        let entriesByCategory = skills.filter(skill => skill.Category__c === category);
+        let numEntries = entriesByCategory.length;
+        let sumRatings = entriesByCategory.map(skill => skill.Rating__c).reduce((acc, currVal) => acc + currVal, 0);
+
+        return sumRatings / (MAX_LEVEL * numEntries);
     }
 
-    initializeChart() {
-        const ctx = this.template.querySelector('canvas');
+    /*get ratingPercentage() {
+        let skillsInTop8 = this.skills.filter(skill => this.top8Categories.includes(skill.Category__c));
+        let useableData = [];
+        for (category of this.top8Categories) {
+            let entriesByCategory = skillsInTop8.filter(skill => skill.Category__c === category);
+            let numEntries = entriesByCategory.length;
+            let sumRatings = entriesByCategory.map(skill => skill.Rating__c).reduce((acc, currVal) => acc + currVal, 0);
 
-        new Chart(ctx, {
-            type: 'radar',
-            data: {
-                labels: [...this.top8Categories],
-                datasets: [{
-                    label: 'Ratio Description',
-                    data: [],
-                }]
-            }
-        });
-    }
+            useableData.push({ category: category, ratio: sumRatings / (MAX_LEVEL * numEntries) })
+        }
+
+        return useableData;
+    }*/
 }

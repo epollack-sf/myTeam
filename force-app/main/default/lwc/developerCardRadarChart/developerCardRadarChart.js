@@ -8,10 +8,10 @@ export default class DeveloperCardRadarChart extends LightningElement {
                 // {id: '', Type__c: '', Category__c: '', Name: '', Rating__c: 2}
     
     get data() {
-        let formattedData = [];
+        const formattedData = [];
         
-        let top8Categories = this.getTop8Categories(this.skills); // array of categories <string>
-        let skillsInTop8 = this.skills.filter(skill => top8Categories.includes(skill.Category__c));
+        const top8Categories = this.getTop8Categories(this.skills); // array of categories <string>
+        const skillsInTop8 = this.skills.filter(skill => top8Categories.includes(skill.Category__c));
         
         for (category of top8Categories) {
             formattedData.push({ category: category, ratio: this.getRatingPercentage(skillsInTop8, category) });

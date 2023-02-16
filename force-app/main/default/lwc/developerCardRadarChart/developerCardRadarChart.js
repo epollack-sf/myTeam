@@ -28,27 +28,47 @@ export default class DeveloperCardRadarChart extends LightningElement {
 
     initializeChart() {
         const ctx = this.template.querySelector('canvas');
-
-        new Chart(ctx, {
+        const config = {
             type: 'radar',
             data: {
                 labels: [...this.data.map(entry => entry.category)],
                 datasets: [{
-                    label: '% of ',
+                    label: 'Total rating/Maximum possible rating by Category',
                     data: [...this.data.map(entry => entry.ratio)],
                 }]
+            },
+            options: {
+                animations: {
+                    /*tension: {
+                        duration: 1000,
+                        easing: 'easeInOutElastic',
+                        from: 1,
+                        to: 0,
+                        loop: true
+                    }*/
+                },
+                scales: {
+                    r: {
+                        angleLines: {
+                            color: 'red'
+                        },
+                        grid: {
+                            circular: true
+                        }
+                    },
+                }
             }
-        });
+        }
+
+        new Chart(ctx, config);
     }
 
     getTop8Categories(skills) {
-        let totalCategories = skills.map(skill => skill.Category__c);
-        let uniqueCategories = Array.from(new Set(totalCategories));
+        const totalCategories = skills.map(skill => skill.Category__c);
+        const uniqueCategories = Array.from(new Set(totalCategories));
         
-        if (uniqueCategories.length <= 8) {
-            return uniqueCategories;
-        } else {
-            let counts = [];
+        if (uniqueCategories.length > 8) {
+            const counts = [];
             
             for (let category of uniqueCategories) {
                 counts.push({ category: category, count: totalCategories.filter(c => c === category).length });
@@ -57,10 +77,12 @@ export default class DeveloperCardRadarChart extends LightningElement {
             
             return counts.map(o => o.category).slice(0, 8);
         }
+
+        return uniqueCategories;
     }
 
     getRatingPercentage(skills, category) {
-        let entriesByCategory = skills.filter(skill => skill.Category__c === category);
+        const entriesByCategory = skills.filter(skill => skill.Category__c === category);
         let numEntries = entriesByCategory.length;
         let sumRatings = entriesByCategory.map(skill => skill.Rating__c).reduce((acc, currVal) => acc + currVal, 0);
 

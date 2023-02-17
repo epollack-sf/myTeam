@@ -7,39 +7,27 @@ const MAX_LEVEL = 5;
 
 export default class DeveloperCardRadarChart extends LightningElement {
     @api employee; // User object to extract info from
-    @api skills; // expected to be an array of Skill objects: {id: '', Type__c: '', Category__c: '', Name: '', Rating__c: 2}
+    _data;
 
-    get data() {
+    @api
+    set skills(value) { // expected to be an array of Skill objects: {id: '', Type__c: '', Category__c: '', Name: '', Rating__c: 2}
         const formattedData = [];
-        
-        const top8Categories = this.getTop8Categories(this.skills);
-        const skillsInTop8 = this.skills.filter(skill => top8Categories.includes(skill.Category__c));
+
+        const top8Categories = this.getTop8Categories(value);
+        const skillsInTop8 = value.filter(skill => top8Categories.includes(skill.Category__c));
         
         for (let category of top8Categories) {
             formattedData.push({ category: category, ratio: this.getRatingPercentage(skillsInTop8, category) });
         }
         
-        return formattedData;
+        this._data = formattedData;
+    }
+
+    get skills() {
+        return this._data;
     }
 
     renderedCallback() {
-        /*const sfSans = new FontFace(
-            'Salesforce Sans-Regular',
-            `url(https://fonts.gstatic.com/s/bitter/v7/HEpP8tJXlWaYHimsnXgfCOvvDin1pK8aKteLpeZ5c0A.woff2)`
-        );
-
-        console.log(JSON.stringify(sfSans));
-
-        this.template.fonts.add(sfSans);
-
-        console.log('break');
-
-        Promise.all([
-            loadScript(this, `${ChartJS}/chart.js`), 
-            sfSans.load()
-        ])*/
-
-
         loadScript(this,`${ChartJS}/chart.js`)
             .then(() => this.initializeChart())
             .catch(e => console.error('Failed to load chart', e.message));
@@ -50,10 +38,10 @@ export default class DeveloperCardRadarChart extends LightningElement {
         const config = {
             type: 'radar',
             data: {
-                labels: [...this.data.map(entry => entry.category)],
+                labels: [...this.skills.map(entry => entry.category)],
                 datasets: [{
                     label: `${this.employee.Name}`,
-                    data: [...this.data.map(entry => entry.ratio)],
+                    data: [...this.skills.map(entry => entry.ratio)],
                     borderColor: 'rgb(216, 58, 0, 0.8)',
                     borderWidth: '2px',
                     backgroundColor: 'rgba(88, 103, 232, 0.7)',

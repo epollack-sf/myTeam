@@ -1,6 +1,7 @@
 import { LightningElement, api } from 'lwc';
 import { loadScript } from 'lightning/platformResourceLoader';
 import ChartJS from '@salesforce/resourceUrl/ChartJS';
+// import SalesforceSans from '@salesforce/resourceUrl/SalesforceSans';
 
 const MAX_LEVEL = 5;
 
@@ -21,9 +22,26 @@ export default class DeveloperCardRadarChart extends LightningElement {
     }
 
     renderedCallback() {
-        loadScript(this, `${ChartJS}/chart.js`)
+        /*const sfSans = new FontFace(
+            'Salesforce Sans-Regular',
+            `url(https://fonts.gstatic.com/s/bitter/v7/HEpP8tJXlWaYHimsnXgfCOvvDin1pK8aKteLpeZ5c0A.woff2)`
+        );
+
+        console.log(JSON.stringify(sfSans));
+
+        this.template.fonts.add(sfSans);
+
+        console.log('break');
+
+        Promise.all([
+            loadScript(this, `${ChartJS}/chart.js`), 
+            sfSans.load()
+        ])*/
+
+
+        loadScript(this,`${ChartJS}/chart.js`)
             .then(() => this.initializeChart())
-            .catch(e => console.error('Failed to load chart.js', e.message));
+            .catch(e => console.error('Failed to load chart', e.message));
     }
 
     initializeChart() {
@@ -35,6 +53,8 @@ export default class DeveloperCardRadarChart extends LightningElement {
                 datasets: [{
                     label: 'Total rating/Maximum possible rating by Category',
                     data: [...this.data.map(entry => entry.ratio)],
+                    borderColor: 'rgb(216, 58, 0, 0.8)',
+                    backgroundColor: 'rgba(88, 103, 232, 0.7)',
                 }]
             },
             options: {
@@ -50,12 +70,23 @@ export default class DeveloperCardRadarChart extends LightningElement {
                 scales: {
                     r: {
                         angleLines: {
-                            color: 'red'
+                            color: '#FE9339'
                         },
                         grid: {
                             circular: true
+                        },
+                        min: 0,
+                        max: 100
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            font: {
+                                family: 'sans-serif'
+                            }
                         }
-                    },
+                    }
                 }
             }
         }
@@ -86,6 +117,6 @@ export default class DeveloperCardRadarChart extends LightningElement {
         let numEntries = entriesByCategory.length;
         let sumRatings = entriesByCategory.map(skill => skill.Rating__c).reduce((acc, currVal) => acc + currVal, 0);
 
-        return sumRatings / (MAX_LEVEL * numEntries);
+        return (sumRatings / (MAX_LEVEL * numEntries)) * 100;
     }
 }

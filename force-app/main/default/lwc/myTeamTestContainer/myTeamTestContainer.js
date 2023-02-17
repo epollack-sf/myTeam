@@ -27,4 +27,8 @@ export default class MyTeamTestContainer extends LightningElement {
             Rating__c: 2
         },
     ];
+
+    employee = {
+        Name: 'Evan'
+    };
 }

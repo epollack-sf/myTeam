@@ -6,6 +6,7 @@ import ChartJS from '@salesforce/resourceUrl/ChartJS';
 const MAX_LEVEL = 5;
 
 export default class DeveloperCardRadarChart extends LightningElement {
+    @api employee; // User object to extract info from
     @api skills; // expected to be an array of Skill objects: {id: '', Type__c: '', Category__c: '', Name: '', Rating__c: 2}
 
     get data() {
@@ -51,9 +52,10 @@ export default class DeveloperCardRadarChart extends LightningElement {
             data: {
                 labels: [...this.data.map(entry => entry.category)],
                 datasets: [{
-                    label: 'Total rating/Maximum possible rating by Category',
+                    label: `${this.employee.Name}`,
                     data: [...this.data.map(entry => entry.ratio)],
                     borderColor: 'rgb(216, 58, 0, 0.8)',
+                    borderWidth: '2px',
                     backgroundColor: 'rgba(88, 103, 232, 0.7)',
                 }]
             },
@@ -70,10 +72,23 @@ export default class DeveloperCardRadarChart extends LightningElement {
                 scales: {
                     r: {
                         angleLines: {
-                            color: '#FE9339'
+                            color: 'rgba(254, 147, 57, 0.75)'
                         },
                         grid: {
-                            circular: true
+                            circular: true,
+                            color: 'rgba(116, 116, 116, 0.25)'
+                        },
+                        pointLabels: {
+                            color: '#444444',
+                            font: {
+                                weight: 'bold'
+                            }
+                        },
+                        ticks: {
+                            color: 'rgb(116, 116, 116)',
+                            callback: function(v, i) {
+                                return i % 2 === 0 ? this.getLabelForValue(v) : '';
+                            }
                         },
                         min: 0,
                         max: 100
@@ -83,9 +98,13 @@ export default class DeveloperCardRadarChart extends LightningElement {
                     legend: {
                         labels: {
                             font: {
-                                family: 'sans-serif'
-                            }
+                                family: 'sans-serif',
+                            },
+                            color: '#444444',
                         }
+                    },
+                    tooltip: {
+                        events: ['click']
                     }
                 }
             }

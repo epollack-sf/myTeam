@@ -1,14 +1,13 @@
 import { LightningElement, api } from 'lwc';
 import { loadScript } from 'lightning/platformResourceLoader';
 import ChartJS from '@salesforce/resourceUrl/ChartJS';
-// import SalesforceSans from '@salesforce/resourceUrl/SalesforceSans';
 
 const MAX_LEVEL = 5;
 
 export default class DeveloperCardRadarChart extends LightningElement {
     @api employee; // User object to extract info from
     _data;
-
+    
     @api
     set skills(value) { // expected to be an array of Skill objects: {id: '', Type__c: '', Category__c: '', Name: '', Rating__c: 2}
         const formattedData = [];
@@ -17,7 +16,7 @@ export default class DeveloperCardRadarChart extends LightningElement {
         const skillsInTop8 = value.filter(skill => top8Categories.includes(skill.Category__c));
         
         for (let category of top8Categories) {
-            formattedData.push({ category: category, ratio: this.getRatingPercentage(skillsInTop8, category) });
+            formattedData.push({ category: category, ratingInfo: this.getRatingPercentage(skillsInTop8, category) });
         }
         
         this._data = formattedData;
@@ -34,6 +33,20 @@ export default class DeveloperCardRadarChart extends LightningElement {
     }
 
     initializeChart() {
+        // Callbacks
+        const getEveryEvenTick = function(v, i) {
+            return i % 2 === 0 ? this.getLabelForValue(v) : '';
+        }
+
+        const tooltipDescription = (tooltipItem) => {
+            const categoryData = this.skills.find(skill => skill.category === tooltipItem[0].label);
+
+            return `Number of Skills in Category: ${categoryData.ratingInfo.numEntriesInCategory}\n` +
+                `Total Score in Category: ${categoryData.ratingInfo.sumRatingsInCategory}\n` +
+                `Maximum Possible Score from ${categoryData.ratingInfo.numEntriesInCategory} Skill(s): ${categoryData.ratingInfo.numEntriesInCategory * MAX_LEVEL}`;
+        }
+        
+        // Chart Setup
         const ctx = this.template.querySelector('canvas');
         const config = {
             type: 'radar',
@@ -41,7 +54,7 @@ export default class DeveloperCardRadarChart extends LightningElement {
                 labels: [...this.skills.map(entry => entry.category)],
                 datasets: [{
                     label: `${this.employee.Name}`,
-                    data: [...this.skills.map(entry => entry.ratio)],
+                    data: [...this.skills.map(entry => entry.ratingInfo.ratio)],
                     borderColor: 'rgb(216, 58, 0, 0.8)',
                     borderWidth: '2px',
                     backgroundColor: 'rgba(88, 103, 232, 0.7)',
@@ -74,9 +87,7 @@ export default class DeveloperCardRadarChart extends LightningElement {
                         },
                         ticks: {
                             color: 'rgb(116, 116, 116)',
-                            callback: function(v, i) {
-                                return i % 2 === 0 ? this.getLabelForValue(v) : '';
-                            }
+                            callback: getEveryEvenTick
                         },
                         min: 0,
                         max: 100
@@ -92,12 +103,16 @@ export default class DeveloperCardRadarChart extends LightningElement {
                         }
                     },
                     tooltip: {
-                        events: ['click']
+                        events: ['click'],
+                        callbacks: {
+                            footer: tooltipDescription
+                        }
                     }
                 }
             }
         }
 
+        // Chart Init
         new Chart(ctx, config);
     }
 
@@ -124,6 +139,10 @@ export default class DeveloperCardRadarChart extends LightningElement {
         let numEntries = entriesByCategory.length;
         let sumRatings = entriesByCategory.map(skill => skill.Rating__c).reduce((acc, currVal) => acc + currVal, 0);
 
-        return (sumRatings / (MAX_LEVEL * numEntries)) * 100;
+        return { 
+            numEntriesInCategory: numEntries,
+            sumRatingsInCategory: sumRatings,
+            ratio: (sumRatings / (MAX_LEVEL * numEntries)) * 100
+        }
     }
 }

@@ -55,7 +55,7 @@ export default class DeveloperCardRadarChart extends LightningElement {
                 datasets: [{
                     label: `${this.employee.Name}`,
                     data: [...this.skills.map(entry => entry.ratingInfo.ratio)],
-                    borderColor: 'rgb(216, 58, 0, 0.8)',
+                    borderColor: 'rgba(216, 58, 0, 0.8)',
                     borderWidth: '2px',
                     backgroundColor: 'rgba(88, 103, 232, 0.7)',
                 }]
@@ -80,9 +80,10 @@ export default class DeveloperCardRadarChart extends LightningElement {
                             color: 'rgba(116, 116, 116, 0.25)'
                         },
                         pointLabels: {
-                            color: '#444444',
                             font: {
-                                weight: 'bold'
+                                family: 'sans-serif',
+                                color: '#444444',
+                                weight: '600'
                             }
                         },
                         ticks: {
@@ -96,14 +97,29 @@ export default class DeveloperCardRadarChart extends LightningElement {
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Sum of Rating / Maximum Rating by Skill Category'
+                        text: 'Sum of Rating / Maximum Rating by Skill Category',
+                        font: {
+                            family: 'sans-serif',
+                            color: '#444444',
+                            weight: '900'
+                        }
                     },
                     legend: {
+                        title: {
+                            display: true,
+                            text: 'Employee:',
+                            font: {
+                                family: 'sans-serif',
+                                color: '#444444',
+                                weight: 'bold'
+                            }
+                            
+                        },
                         labels: {
                             font: {
                                 family: 'sans-serif',
-                            },
-                            color: '#444444',
+                                color: '#444444'
+                            }
                         }
                     },
                     tooltip: {

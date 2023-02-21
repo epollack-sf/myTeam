@@ -94,6 +94,10 @@ export default class DeveloperCardRadarChart extends LightningElement {
                     }
                 },
                 plugins: {
+                    title: {
+                        display: true,
+                        text: 'Sum of Rating / Maximum Rating by Skill Category'
+                    },
                     legend: {
                         labels: {
                             font: {

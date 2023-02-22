@@ -11,7 +11,6 @@ export default class DeveloperCardRadarChart extends LightningElement {
     @api
     set skills(value) { // expected to be an array of Skill objects: {id: '', Type__c: '', Category__c: '', Name: '', Rating__c: 2}
         const formattedData = [];
-
         const top8Categories = this.getTop8Categories(value);
         const skillsInTop8 = value.filter(skill => top8Categories.includes(skill.Category__c));
         
@@ -36,7 +35,7 @@ export default class DeveloperCardRadarChart extends LightningElement {
         // Callbacks
         const getEveryEvenTick = function(v, i) {
             return i % 2 === 0 ? this.getLabelForValue(v) : '';
-        }
+        };
 
         const tooltipDescription = (tooltipItems) => {
             const categoryData = this.skills.find(skill => skill.category === tooltipItems[0].label);
@@ -44,96 +43,124 @@ export default class DeveloperCardRadarChart extends LightningElement {
             return `Number of Skills in Category: ${categoryData.ratingInfo.numEntriesInCategory}\n` +
                 `Total Score in Category: ${categoryData.ratingInfo.sumRatingsInCategory}\n` +
                 `Maximum Possible Score from ${categoryData.ratingInfo.numEntriesInCategory} Skill(s): ${categoryData.ratingInfo.numEntriesInCategory * MAX_LEVEL}`;
-        }
-        
-        // Chart Setup
-        const ctx = this.template.querySelector('canvas');
-        const config = {
-            type: 'radar',
-            data: {
-                labels: [...this.skills.map(entry => entry.category)],
-                datasets: [{
-                    label: `${this.employee.Name}`,
-                    data: [...this.skills.map(entry => entry.ratingInfo.ratio)],
-                    borderColor: 'rgba(216, 58, 0, 0.8)',
-                    borderWidth: '2px',
-                    backgroundColor: 'rgba(88, 103, 232, 0.7)',
-                }]
-            },
-            options: {
-                animations: {
-                    /*tension: {
-                        duration: 1000,
-                        easing: 'easeInOutElastic',
-                        from: 1,
-                        to: 0,
-                        loop: true
-                    }*/
-                },
-                scales: {
-                    r: {
-                        angleLines: {
-                            color: 'rgba(254, 147, 57, 0.75)'
-                        },
-                        grid: {
-                            circular: true,
-                            color: 'rgba(116, 116, 116, 0.25)'
-                        },
-                        pointLabels: {
-                            font: {
-                                family: 'sans-serif',
-                                color: '#444444',
-                                weight: '600'
-                            }
-                        },
-                        ticks: {
-                            color: 'rgb(116, 116, 116)',
-                            callback: getEveryEvenTick
-                        },
-                        min: 0,
-                        max: 100
-                    }
-                },
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Sum of Rating / Maximum Rating by Skill Category',
-                        font: {
-                            family: 'sans-serif',
-                            color: '#444444',
-                            weight: '900'
-                        }
-                    },
-                    legend: {
-                        title: {
-                            display: true,
-                            text: 'Employee:',
-                            font: {
-                                family: 'sans-serif',
-                                color: '#444444',
-                                weight: 'bold'
-                            }
-                            
-                        },
-                        labels: {
-                            font: {
-                                family: 'sans-serif',
-                                color: '#444444'
-                            }
-                        }
-                    },
-                    tooltip: {
-                        events: ['click'],
-                        callbacks: {
-                            footer: tooltipDescription
-                        }
-                    }
+        };
+
+        const hoverEffects = () => {
+            if (skillChart.data.datasets[0].borderWidth !== 3 && 
+                    skillChart.options.elements.point.radius !== 5) {
+                skillChart.data.datasets[0].borderWidth = 3;
+                skillChart.options.elements.point.radius = 5;
+                
+                skillChart.update();
+            }
+        };
+
+        // Plugins
+        const stopHoverEffects = {
+            id: 'stopHover',
+            beforeEvent(chart, args) {
+                const event = args.event;
+                
+                if (event.type === 'mouseout') {
+                    chart.data.datasets[0].borderWidth = 1;
+                    chart.options.elements.point.radius = 3;
+                    
+                    skillChart.update();
                 }
             }
         }
+        
+        // Chart Setup
+        const data = {
+            labels: [...this.skills.map(entry => entry.category)],
+            datasets: [{
+                label: `${this.employee.Name}`,
+                data: [...this.skills.map(entry => entry.ratingInfo.ratio)],
+                borderColor: 'rgba(216, 58, 0, 0.8)',
+                borderWidth: 1,
+                backgroundColor: 'rgba(88, 103, 232, 0.7)',
+            }]
+        };
 
+        const options = {
+            onHover: hoverEffects,
+            elements: {
+                point: {
+                    pointStyle: 'rectRot',
+                    hoverRadius: 5
+                },
+            },
+            scales: {
+                r: {
+                    angleLines: {
+                        color: 'rgba(254, 147, 57, 0.75)'
+                    },
+                    grid: {
+                        circular: true,
+                        color: 'rgba(116, 116, 116, 0.25)'
+                    },
+                    pointLabels: {
+                        font: {
+                            family: 'sans-serif',
+                            color: '#444444',
+                            weight: '600'
+                        }
+                    },
+                    ticks: {
+                        color: 'rgb(116, 116, 116)',
+                        callback: getEveryEvenTick
+                    },
+                    min: 0,
+                    max: 100
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Sum of Rating / Maximum Rating by Skill Category',
+                    font: {
+                        family: 'sans-serif',
+                        color: '#444444',
+                        weight: '900'
+                    }
+                },
+                legend: {
+                    title: {
+                        display: true,
+                        text: 'Employee:',
+                        font: {
+                            family: 'sans-serif',
+                            color: '#444444',
+                            weight: 'bold'
+                        }
+                        
+                    },
+                    labels: {
+                        font: {
+                            family: 'sans-serif',
+                            color: '#444444'
+                        }
+                    }
+                },
+                tooltip: {
+                    events: ['click'],
+                    callbacks: {
+                        footer: tooltipDescription
+                    }
+                }
+            }
+        };
+        
         // Chart Init
-        new Chart(ctx, config);
+        const ctx = this.template.querySelector('canvas');
+        const config = {
+            type: 'radar',
+            data: data,
+            options: options,
+            plugins: [stopHoverEffects]
+        };
+
+        const skillChart = new Chart(ctx, config);
     }
 
     getTop8Categories(skills) {
@@ -156,6 +183,7 @@ export default class DeveloperCardRadarChart extends LightningElement {
 
     getRatingPercentage(skills, category) {
         const entriesByCategory = skills.filter(skill => skill.Category__c === category);
+        
         let numEntries = entriesByCategory.length;
         let sumRatings = entriesByCategory.map(skill => skill.Rating__c).reduce((acc, currVal) => acc + currVal, 0);
 

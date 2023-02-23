@@ -85,7 +85,7 @@ export default class DeveloperCardRadarChart extends LightningElement {
             beforeEvent(chart, args) {
                 const event = args.event;
                 
-                if (event.type === 'mouseout') {
+                if (event.type === 'mouseleave') {
                     chart.data.datasets[0].borderWidth = 1;
                     chart.options.elements.point.radius = 3;
                     

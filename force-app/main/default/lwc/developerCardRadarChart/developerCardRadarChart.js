@@ -31,6 +31,8 @@ export default class DeveloperCardRadarChart extends LightningElement {
             .catch(e => console.error('Failed to load chart', e.message));
     }
 
+
+    // Add constants to store reused RGBA/color info
     initializeChart() {
         // Callbacks
         const getEveryEvenTick = function(v, i) {
@@ -68,14 +70,14 @@ export default class DeveloperCardRadarChart extends LightningElement {
                     skillChart.update();
                 }
             }
-        }
+        };
         
         // Chart Setup
         const data = {
-            labels: [...this.skills.map(entry => entry.category)],
+            labels: this.skills.map(entry => entry.category),
             datasets: [{
                 label: `${this.employee.Name}`,
-                data: [...this.skills.map(entry => entry.ratingInfo.ratio)],
+                data: this.skills.map(entry => entry.ratingInfo.ratio),
                 borderColor: 'rgba(216, 58, 0, 0.8)',
                 borderWidth: 1,
                 backgroundColor: 'rgba(88, 103, 232, 0.7)',
@@ -83,6 +85,7 @@ export default class DeveloperCardRadarChart extends LightningElement {
         };
 
         const options = {
+            events: [...Chart.defaults.events, 'mouseleave'],
             onHover: hoverEffects,
             elements: {
                 point: {
@@ -163,6 +166,9 @@ export default class DeveloperCardRadarChart extends LightningElement {
         const skillChart = new Chart(ctx, config);
     }
 
+    // consistent categories across all graphs
+    // Assume we can boil skills to 6 or so --> Bucket categories into Technical, Strategy, Design, Product
+    // Ratio correct, need different formatting to get there
     getTop8Categories(skills) {
         const totalCategories = skills.map(skill => skill.Category__c);
         const uniqueCategories = Array.from(new Set(totalCategories));
@@ -191,6 +197,6 @@ export default class DeveloperCardRadarChart extends LightningElement {
             numEntriesInCategory: numEntries,
             sumRatingsInCategory: sumRatings,
             ratio: (sumRatings / (MAX_LEVEL * numEntries)) * 100
-        }
+        };
     }
 }

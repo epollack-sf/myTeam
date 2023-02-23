@@ -2,7 +2,31 @@ import { LightningElement, api } from 'lwc';
 import { loadScript } from 'lightning/platformResourceLoader';
 import ChartJS from '@salesforce/resourceUrl/ChartJS';
 
+// General Config
 const MAX_LEVEL = 5;
+const CHART_TITLE = 'Sum of Rating / Maximum Rating by Skill Category';
+const LEGEND_TITLE = 'Employee:';
+const POINT_STYLE = 'rectRot';
+const POINT_HOVER_RADIUS = 5;
+const LINE_WIDTH = 1;
+
+// Colors
+const TEXT_COLOR = '#444444';
+const TICK_COLOR = 'rgb(116, 116, 116)';
+const GRID_COLOR = 'rgba(116, 116, 116, 0.25)';
+const AXIS_COLOR = 'rgba(254, 147, 57, 0.75)';
+const BACKGROUND_COLOR = 'rgba(88, 103, 232, 0.7)';
+const LINE_COLOR = 'rgba(216, 58, 0, 0.8)';
+
+// Fonts
+const FONT_FAMILY = 'sans-serif';
+const BOLD_NORMAL = '600';
+const BOLD = 'bold';
+const BOLDEST = '900';
+
+// Axes
+const MIN = 0;
+const MAX = 100;
 
 export default class DeveloperCardRadarChart extends LightningElement {
     @api employee; // User object to extract info from
@@ -31,8 +55,6 @@ export default class DeveloperCardRadarChart extends LightningElement {
             .catch(e => console.error('Failed to load chart', e.message));
     }
 
-
-    // Add constants to store reused RGBA/color info
     initializeChart() {
         // Callbacks
         const getEveryEvenTick = function(v, i) {
@@ -72,15 +94,15 @@ export default class DeveloperCardRadarChart extends LightningElement {
             }
         };
         
-        // Chart Setup
+        // Chart Config
         const data = {
             labels: this.skills.map(entry => entry.category),
             datasets: [{
                 label: `${this.employee.Name}`,
                 data: this.skills.map(entry => entry.ratingInfo.ratio),
-                borderColor: 'rgba(216, 58, 0, 0.8)',
-                borderWidth: 1,
-                backgroundColor: 'rgba(88, 103, 232, 0.7)',
+                borderColor: LINE_COLOR,
+                borderWidth: LINE_WIDTH,
+                backgroundColor: BACKGROUND_COLOR,
             }]
         };
 
@@ -89,59 +111,58 @@ export default class DeveloperCardRadarChart extends LightningElement {
             onHover: hoverEffects,
             elements: {
                 point: {
-                    pointStyle: 'rectRot',
-                    hoverRadius: 5
+                    pointStyle: POINT_STYLE,
+                    hoverRadius: POINT_HOVER_RADIUS
                 },
             },
             scales: {
                 r: {
                     angleLines: {
-                        color: 'rgba(254, 147, 57, 0.75)'
+                        color: AXIS_COLOR
                     },
                     grid: {
                         circular: true,
-                        color: 'rgba(116, 116, 116, 0.25)'
+                        color: GRID_COLOR
                     },
                     pointLabels: {
                         font: {
-                            family: 'sans-serif',
-                            color: '#444444',
-                            weight: '600'
+                            family: FONT_FAMILY, 
+                            color: TEXT_COLOR,
+                            weight: BOLD_NORMAL
                         }
                     },
                     ticks: {
-                        color: 'rgb(116, 116, 116)',
+                        color: TICK_COLOR,
                         callback: getEveryEvenTick
                     },
-                    min: 0,
-                    max: 100
+                    min: MIN,
+                    max: MAX
                 }
             },
             plugins: {
                 title: {
                     display: true,
-                    text: 'Sum of Rating / Maximum Rating by Skill Category',
+                    text: CHART_TITLE,
                     font: {
-                        family: 'sans-serif',
-                        color: '#444444',
-                        weight: '900'
+                        family: FONT_FAMILY, 
+                        color: TEXT_COLOR,
+                        weight: BOLDEST
                     }
                 },
                 legend: {
                     title: {
                         display: true,
-                        text: 'Employee:',
+                        text: LEGEND_TITLE,
                         font: {
-                            family: 'sans-serif',
-                            color: '#444444',
-                            weight: 'bold'
+                            family: FONT_FAMILY,
+                            color: TEXT_COLOR,
+                            weight: BOLD
                         }
-                        
                     },
                     labels: {
                         font: {
-                            family: 'sans-serif',
-                            color: '#444444'
+                            family: FONT_FAMILY,
+                            color: TEXT_COLOR
                         }
                     }
                 },

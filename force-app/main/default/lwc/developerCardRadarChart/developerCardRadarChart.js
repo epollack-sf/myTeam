@@ -6,6 +6,7 @@ import ChartJS from '@salesforce/resourceUrl/ChartJS';
 const MAX_LEVEL = 5;
 const CHART_TITLE = 'Sum of Rating / Maximum Rating by Skill Category';
 const LEGEND_TITLE = 'Employee:';
+const LEGEND_BOX_BORDER_RADIUS = 2;
 const POINT_STYLE = 'rectRot';
 const POINT_HOVER_RADIUS = 5;
 const LINE_WIDTH = 1;
@@ -57,8 +58,8 @@ export default class DeveloperCardRadarChart extends LightningElement {
 
     initializeChart() {
         // Callbacks
-        const getEveryEvenTick = function(v, i) {
-            return i % 2 === 0 ? this.getLabelForValue(v) : '';
+        const getEveryEvenTick = function(value, index) {
+            return index % 2 === 0 ? this.getLabelForValue(value) : '';
         };
 
         const tooltipDescription = (tooltipItems) => {
@@ -79,6 +80,24 @@ export default class DeveloperCardRadarChart extends LightningElement {
             }
         };
 
+        const legendLabelGenerator = (chart) => {
+            return chart.data.datasets.map((dataset) => ({
+                text: dataset.label,
+                fillStyle: dataset.backgroundColor,
+                strokeStyle: dataset.borderColor,
+                borderWidth: dataset.borderWidth,
+                // fontColor: TEXT_COLOR,
+                borderRadius: LEGEND_BOX_BORDER_RADIUS
+            }))
+        };
+
+        /*const hideDataset = (chart, legendItem, legend) => {
+            // let hidden = chart.data.datasets[0].hidden;
+            hideConsumptionItem(legendItem)
+
+            // return hidden ? chart.update('hide') : chart.update('show');
+        }*/
+
         // Plugins
         const stopHoverEffects = {
             id: 'stopHover',
@@ -93,6 +112,10 @@ export default class DeveloperCardRadarChart extends LightningElement {
                 }
             }
         };
+
+        // Default Config
+        Chart.defaults.font.family = FONT_FAMILY;
+        Chart.defaults.font.color = TEXT_COLOR;
         
         // Chart Config
         const data = {
@@ -102,7 +125,7 @@ export default class DeveloperCardRadarChart extends LightningElement {
                 data: this.skills.map(entry => entry.ratingInfo.ratio),
                 borderColor: LINE_COLOR,
                 borderWidth: LINE_WIDTH,
-                backgroundColor: BACKGROUND_COLOR,
+                backgroundColor: BACKGROUND_COLOR
             }]
         };
 
@@ -126,8 +149,6 @@ export default class DeveloperCardRadarChart extends LightningElement {
                     },
                     pointLabels: {
                         font: {
-                            family: FONT_FAMILY, 
-                            color: TEXT_COLOR,
                             weight: BOLD_NORMAL
                         }
                     },
@@ -144,8 +165,6 @@ export default class DeveloperCardRadarChart extends LightningElement {
                     display: true,
                     text: CHART_TITLE,
                     font: {
-                        family: FONT_FAMILY, 
-                        color: TEXT_COLOR,
                         weight: BOLDEST
                     }
                 },
@@ -154,16 +173,12 @@ export default class DeveloperCardRadarChart extends LightningElement {
                         display: true,
                         text: LEGEND_TITLE,
                         font: {
-                            family: FONT_FAMILY,
-                            color: TEXT_COLOR,
                             weight: BOLD
                         }
                     },
                     labels: {
-                        font: {
-                            family: FONT_FAMILY,
-                            color: TEXT_COLOR
-                        }
+                        // onClick: hideDataset,
+                        generateLabels: legendLabelGenerator
                     }
                 },
                 tooltip: {

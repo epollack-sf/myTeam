@@ -28,13 +28,22 @@ export default class SpiderGraphTest extends LightningElement {
         new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Indigo', 'Violet', 'Cheese'],
+                labels: ['Other', 'Consulting', 'Sales', 'Great Characteristics', 'Product', 'Discipline', 'Industry', 'Solution Engineering', 'Technical', 'Customer Engagement'],
                 datasets: [{
                     label: '# of Votes',
-                    data: [12, 19, 3, 5, 2, 1, 5, 15],
+                    data: [100, 19, 25, 40, 32, 57, 86, 15, 5, 10],
                     borderWidth: 1
                 }]
             },
+            options: {
+                scales: {
+                    r: {
+                        grid: {
+                            circular: true
+                        }
+                    }
+                }
+            }
         });
     }
 

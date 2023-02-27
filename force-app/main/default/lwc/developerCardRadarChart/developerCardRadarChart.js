@@ -53,7 +53,7 @@ export default class DeveloperCardRadarChart extends LightningElement {
     renderedCallback() {
         loadScript(this,`${ChartJS}/chart.js`)
             .then(() => this.initializeChart())
-            .catch(e => console.error('Failed to load chart', e.message));
+            .catch(e => console.error('Failed to load chart', e.message)); // change to toast message
     }
 
     initializeChart() {
@@ -86,7 +86,6 @@ export default class DeveloperCardRadarChart extends LightningElement {
                 fillStyle: dataset.backgroundColor,
                 strokeStyle: dataset.borderColor,
                 borderWidth: dataset.borderWidth,
-                // fontColor: TEXT_COLOR,
                 borderRadius: LEGEND_BOX_BORDER_RADIUS
             }))
         };
@@ -108,7 +107,7 @@ export default class DeveloperCardRadarChart extends LightningElement {
                     chart.data.datasets[0].borderWidth = 1;
                     chart.options.elements.point.radius = 3;
                     
-                    skillChart.update();
+                    chart.update();
                 }
             }
         };

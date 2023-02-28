@@ -30,11 +30,11 @@ const MIN = 0;
 const MAX = 100;
 
 export default class DeveloperCardRadarChart extends LightningElement {
-    @api employee; // User object to extract info from
+    @api employee;
     _data;
     
     @api
-    set skills(value) { // expected to be an array of Skill objects: {id: '', Type__c: '', Category__c: '', Name: '', Rating__c: 2}
+    set skills(value) {
         const formattedData = [];
         const top8Categories = this.getTop8Categories(value);
         const skillsInTop8 = value.filter(skill => top8Categories.includes(skill.Category__c));
@@ -53,7 +53,7 @@ export default class DeveloperCardRadarChart extends LightningElement {
     renderedCallback() {
         loadScript(this,`${ChartJS}/chart.js`)
             .then(() => this.initializeChart())
-            .catch(e => console.error('Failed to load chart', e.message)); // change to toast message
+            .catch(e => console.error('Failed to load chart', e.message));
     }
 
     initializeChart() {
@@ -89,13 +89,6 @@ export default class DeveloperCardRadarChart extends LightningElement {
                 borderRadius: LEGEND_BOX_BORDER_RADIUS
             }))
         };
-
-        /*const hideDataset = (chart, legendItem, legend) => {
-            // let hidden = chart.data.datasets[0].hidden;
-            hideConsumptionItem(legendItem)
-
-            // return hidden ? chart.update('hide') : chart.update('show');
-        }*/
 
         // Plugins
         const stopHoverEffects = {
@@ -201,9 +194,6 @@ export default class DeveloperCardRadarChart extends LightningElement {
         const skillChart = new Chart(ctx, config);
     }
 
-    // consistent categories across all graphs
-    // Assume we can boil skills to 6 or so --> Bucket categories into Technical, Strategy, Design, Product
-    // Ratio correct, need different formatting to get there
     getTop8Categories(skills) {
         const totalCategories = skills.map(skill => skill.Category__c);
         const uniqueCategories = Array.from(new Set(totalCategories));
